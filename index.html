@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -36,7 +36,7 @@
     <h1 class="text-3xl font-bold text-green-800">فن الرسم على أحواض النباتات</h1>
     <p class="text-lg mt-4 text-gray-600">طلباتك ترعاها أيادي مبدعة في انتظارك</p>
     <button onclick="openCart()" class="absolute left-4 top-4 bg-orange-400 text-white px-4 py-2 rounded-lg shadow hover:bg-orange-500">
-      🛒 عرض السلة
+      🛒 عرض السلة (<span id="cart-count">0</span>)
     </button>
   </header>
 
@@ -79,18 +79,32 @@
   </div>
 
   <script>
-    const images = Array.from({ length: 24 }, (_, i) => `https://i.imgur.com/UE5syDU.png${i + 1}`);
-    const prices = [1500,1600,1700,1800,1900,2000,2100,2200,2300,2400,2500,2600,2700,2800,2900,3000,3100,3200,3300,3400,3500,3600,3700,3800];
+    const products = [
+      { image: 'https://i.imgur.com/ybehaTa.jpeg', price: 300 },
+      { image: 'https://i.imgur.com/2IEF8Jb.jpeg', price: 300 },
+      { image: 'https://i.imgur.com/8rkpIfq.jpeg', price: 400 },
+      { image: 'https://i.imgur.com/abc126.jpg', price: 400 },
+      { image: 'https://i.imgur.com/abc127.jpg', price: 400 },
+      { image: 'https://i.imgur.com/abc128.jpg', price: 400 },
+      { image: 'https://i.imgur.com/abc129.jpg', price: 500 },
+      { image: 'https://i.imgur.com/abc130.jpg', price: 300 },
+      { image: 'https://i.imgur.com/abc131.jpg', price: 300 },
+      { image: 'https://i.imgur.com/abc132.jpg', price: 400 },
+      { image: 'https://i.imgur.com/abc133.jpg', price: 500 },
+      { image: 'https://i.imgur.com/abc134.jpg', price: 600 },
+    ];
+
     let currentPage = 1;
     const perPage = 8;
+    let cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
 
     function renderGallery() {
       const gallery = document.getElementById("gallery");
       gallery.innerHTML = "";
       const start = (currentPage - 1) * perPage;
-      const pageImages = images.slice(start, start + perPage);
+      const pageProducts = products.slice(start, start + perPage);
 
-      pageImages.forEach((src, index) => {
+      pageProducts.forEach((product, index) => {
         const container = document.createElement("div");
         container.className = "flex flex-col items-center";
 
@@ -98,25 +112,25 @@
         squareWrapper.className = "w-full aspect-square overflow-hidden rounded-lg shadow-md cursor-pointer";
 
         const img = document.createElement("img");
-        img.src = src;
-        img.alt = src;
+        img.src = product.image;
+        img.alt = product.image;
         img.className = "w-full h-full object-cover hover:scale-110 transition-transform duration-300";
-        img.onclick = () => showZoom(src);
+        img.onclick = () => showZoom(product.image);
 
         squareWrapper.appendChild(img);
 
         const name = document.createElement("p");
         name.className = "mt-2 text-sm text-gray-700";
-        name.textContent = src.split("/").pop();
+        name.textContent = product.image.split("/").pop();
 
         const price = document.createElement("p");
         price.className = "text-lg font-bold text-green-700 mt-1";
-        price.textContent = `السعر: ${prices[start + index]} دج`;
+        price.textContent = `السعر: ${product.price} دج`;
 
         const button = document.createElement("button");
         button.textContent = "أضف إلى السلة";
         button.className = "mt-2 bg-orange-400 hover:bg-orange-500 text-white px-3 py-1 rounded text-sm shadow";
-        button.onclick = () => addToCart(src, prices[start + index]);
+        button.onclick = () => addToCart(product.image, product.price);
 
         container.appendChild(squareWrapper);
         container.appendChild(name);
@@ -129,7 +143,7 @@
     }
 
     function changePage(step) {
-      const maxPage = Math.ceil(images.length / perPage);
+      const maxPage = Math.ceil(products.length / perPage);
       currentPage = Math.max(1, Math.min(currentPage + step, maxPage));
       renderGallery();
     }
@@ -143,14 +157,11 @@
       document.getElementById("zoom").classList.add("hidden");
     }
 
-    // سلة المشتريات
-    let cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
-
     function addToCart(image, price) {
       cartItems.push({ image, price });
       localStorage.setItem("cartItems", JSON.stringify(cartItems));
       localStorage.setItem("cartTotal", getTotal());
-
+      updateCartCount();
       alert("تمت الإضافة إلى السلة!");
     }
 
@@ -161,7 +172,7 @@
     function openCart() {
       const container = document.getElementById("cart-items");
       container.innerHTML = "";
-      cartItems.forEach(item => {
+      cartItems.forEach((item, index) => {
         const div = document.createElement("div");
         div.className = "flex items-center gap-3 border-b pb-2";
 
@@ -173,22 +184,41 @@
         p.textContent = `${item.price} دج`;
         p.className = "font-semibold text-green-700";
 
+        const deleteButton = document.createElement("button");
+        deleteButton.textContent = "حذف";
+        deleteButton.className = "text-red-500 hover:text-red-700 font-semibold";
+        deleteButton.onclick = () => removeItem(index);
+
         div.appendChild(img);
         div.appendChild(p);
+        div.appendChild(deleteButton);
         container.appendChild(div);
       });
 
       document.getElementById("cart-total").textContent = getTotal();
       document.getElementById("cart-modal").classList.remove("hidden");
+
+      updateCartCount();
     }
 
     function closeCart() {
       document.getElementById("cart-modal").classList.add("hidden");
     }
 
-    document.addEventListener("DOMContentLoaded", renderGallery);
+    function removeItem(index) {
+      cartItems.splice(index, 1);
+      localStorage.setItem("cartItems", JSON.stringify(cartItems));
+      localStorage.setItem("cartTotal", getTotal());
+      openCart();
+      updateCartCount();
+    }
 
-    
+    function updateCartCount() {
+      const cartCount = document.getElementById("cart-count");
+      cartCount.textContent = cartItems.length;
+    }
+
+    document.addEventListener("DOMContentLoaded", renderGallery);
   </script>
 </body>
 </html>
