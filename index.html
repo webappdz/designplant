@@ -35,8 +35,11 @@
   <header class="bg-green-100 text-center py-8 shadow-md relative">
     <h1 class="text-3xl font-bold text-green-800">فن الرسم على أحواض النباتات</h1>
     <p class="text-lg mt-4 text-gray-600">طلباتك ترعاها أيادي مبدعة في انتظارك</p>
-    <button onclick="openCart()" class="absolute left-4 top-4 bg-orange-400 text-white px-4 py-2 rounded-lg shadow hover:bg-orange-500">
-      🛒 عرض السلة (<span id="cart-count">0</span>)
+    <button onclick="openCart()" class="absolute left-4 top-4 bg-orange-400 text-white px-4 py-2 rounded-lg shadow hover:bg-orange-500 sm:left-2 sm:top-2">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h18M3 3l9 18 9-18" />
+      </svg>
+      سلة التسوق (<span id="cart-count">0</span>)
     </button>
   </header>
 
